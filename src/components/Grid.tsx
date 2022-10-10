@@ -1,5 +1,10 @@
 import styled from '@emotion/styled'
-import { motion } from 'framer-motion'
+import {
+	animate,
+	motion,
+	useMotionValue,
+	useTransform
+} from 'framer-motion'
 import { useEffect, useState } from 'react'
 import Cell, { CELL_SIZE } from './Cell'
 
@@ -19,6 +24,26 @@ const Container = styled(motion.div)<{
 function Grid() {
 	const [columns, setColumns] = useState(0)
 	const [rows, setRows] = useState(0)
+
+	// mouse position
+	const mouseX = useMotionValue(0)
+	const mouseY = useMotionValue(0)
+
+	// handle mouse move on document
+	useEffect(() => {
+		const handleMouseMove = (e: MouseEvent) => {
+			// animate mouse x and y
+			animate(mouseX, e.clientX)
+			animate(mouseY, e.clientY)
+		}
+		// recalculate grid on resize
+		window.addEventListener('mousemove', handleMouseMove)
+
+		// cleanup
+		return () => {
+			window.removeEventListener('mousemove', handleMouseMove)
+		}
+	}, [])
 
 	// determine rows and columns
 	useEffect(() => {
@@ -41,7 +66,7 @@ function Grid() {
 	return (
 		<Container columns={columns}>
 			{Array.from({ length: columns * rows }).map((_, i) => (
-				<Cell key={i} />
+				<Cell key={i} mouseX={mouseX} mouseY={mouseY} />
 			))}
 		</Container>
 	)
